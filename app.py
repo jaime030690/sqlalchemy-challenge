@@ -36,21 +36,15 @@ def home():
 @app.route('/api/v1.0/precipitation')
 def precipitation():
 
-    ''' 
-    TODO:
-    Convert the query results to a Dictionary using date as the key and prcp as the value.
-    Return the JSON representation of your dictionary.
-
-    '''
-
+    # Setup session
     session = Session(engine)
-
     query = session.query(Measurement.date, Measurement.prcp).all()
-
     session.close()
 
+    # Will return this
     results = []
     
+    # Look thru query, use date as key and prcp as value, and add dict to list
     for d, p in query:
         climate_dict = {}
         climate_dict[d] = p
@@ -60,12 +54,23 @@ def precipitation():
 
 @app.route('/api/v1.0/stations')
 def stations():
+    
+    # Setup engine
+    session = Session(engine)
+    query = session.query(Station.station, Station.name).all()
+    session.close()
 
-    '''
-    TODO:
-    Return a JSON list of stations from the dataset.
+    # Will return this
+    results = []
 
-    '''
+    # Look thru query, use station and name as keys and apply the corresponding values, add to list
+    for s, n in query:
+        station_dict = {}
+        station_dict['station'] = s
+        station_dict['name'] = n
+        results.append(station_dict)
+
+    return jsonify(results)
 
 @app.route('/api/v1.0/tobs')
 def tobs():
