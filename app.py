@@ -43,6 +43,21 @@ def precipitation():
 
     '''
 
+    session = Session(engine)
+
+    query = session.query(Measurement.date, Measurement.prcp).all()
+
+    session.close()
+
+    results = []
+    
+    for d, p in query:
+        climate_dict = {}
+        climate_dict[d] = p
+        results.append(climate_dict)
+
+    return jsonify(results)
+
 @app.route('/api/v1.0/stations')
 def stations():
 
