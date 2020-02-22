@@ -1,7 +1,26 @@
+# Import dependencies
+import numpy as np
+
+import sqlalchemy
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, func
+
 from flask import Flask, jsonify
 
+# Create engine
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
+Base = automap_base()
+Base.prepare(engine, reflect=True)
+
+# Create tables
+Measurement = Base.classes.measurement
+Station = Base.classes.station
+
+# Setup flask
 app = Flask(__name__)
 
+# Flask routes
 @app.route('/')
 def home():
     return (
@@ -44,7 +63,7 @@ def tobs():
     '''
 
 @app.route('/api/v1.0/<start>')
-def start():
+def start(start):
 
     '''
     TODO:
@@ -55,7 +74,7 @@ def start():
     '''
 
 @app.route('/api/v1.0/<start>/<end>')
-def start_end():
+def start_end(start, end):
 
     '''
     TODO:
@@ -63,3 +82,6 @@ def start_end():
     When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
 
     '''
+    
+if __name__ == '__main__':
+    app.run(debug=True)
