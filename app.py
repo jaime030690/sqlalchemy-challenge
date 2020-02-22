@@ -8,6 +8,8 @@ from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify
 
+import datetime as dt
+
 # Create engine
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 Base = automap_base()
@@ -38,6 +40,8 @@ def precipitation():
 
     # Setup session
     session = Session(engine)
+
+    # Query to pull date and prcp
     query = session.query(Measurement.date, Measurement.prcp).all()
     session.close()
 
@@ -54,9 +58,11 @@ def precipitation():
 
 @app.route('/api/v1.0/stations')
 def stations():
-    
+
     # Setup engine
     session = Session(engine)
+
+    # Query to pull station and name
     query = session.query(Station.station, Station.name).all()
     session.close()
 
@@ -75,13 +81,29 @@ def stations():
 @app.route('/api/v1.0/tobs')
 def tobs():
 
-    '''
-    TODO:
-    Query for the dates and temperature observations from a year from the last data point.
-    Return a JSON list of Temperature Observations (tobs) for the previous year.
-    
-    '''
+    # Setup engine
+    session = Session(engine)
 
+    # Query to pull last date
+    query = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    session.close()
+
+    # Calculate date for one year ago
+    y, m, d = [int(item) for item in query[0].split("-")]
+    cutoff = dt.datetime(y-1, m, d)
+
+    # Query to pull tobs
+    query = session.query(Measurement.tobs).filter(func.strftime(Measurement.date) >= cutoff).all()
+    session.close()
+
+    # Return this
+    results = []
+
+    # Convert query to a list
+    results = list(np.ravel(query))
+
+    return jsonify(results)
+    
 @app.route('/api/v1.0/<start>')
 def start(start):
 
@@ -89,7 +111,6 @@ def start(start):
     TODO:
     Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
     When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
-    When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
 
     '''
 
